@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MongoBongo.Models.Config;
 using MongoBongo.Services;
-using VueCliMiddleware;
 
 namespace MongoBongo
 {
@@ -24,13 +23,21 @@ namespace MongoBongo
             services
                 .Configure<WorkDbSettings>(Configuration.GetSection(nameof(WorkDbSettings)))
                 .AddSingleton<IWorkDbSettings>(sp => sp.GetRequiredService<IOptions<WorkDbSettings>>().Value)
-                .AddSingleton<WorkService>()
-                .AddControllers()
-                .AddNewtonsoftJson(opt => opt.UseMemberCasing());
+                .AddSingleton<WorkService>();
 
-            services.AddSpaStaticFiles(configuration =>
+            services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp");
+
+            services.AddControllers().AddNewtonsoftJson(opt => opt.UseMemberCasing());
+
+            services.AddCors(opt =>
             {
-                configuration.RootPath = "ClientApp";
+                opt.AddPolicy("VueCorsPolicy", builder =>
+                {
+                    builder.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .WithOrigins("https://localhost:5001");
+                });
             });
         }
 
@@ -41,25 +48,19 @@ namespace MongoBongo
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseRouting();
-            app.UseSpaStaticFiles();
-            app.UseAuthorization();
+            app.UseCors("VueCorsPolicy");
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseAuthentication();
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseSpaStaticFiles();
 
             app.UseSpa(spa =>
             {
                 if (env.IsDevelopment())
-                    spa.Options.SourcePath = "ClientApp/";
-                else
-                    spa.Options.SourcePath = "dist";
-
-                if (env.IsDevelopment())
                 {
-                    spa.UseVueCli(npmScript: "serve");
+                    spa.UseProxyToSpaDevelopmentServer("http://localhost:8080");
                 }
             });
         }
