@@ -29,9 +29,9 @@ namespace MongoBongo
                 .AddNewtonsoftJson(opt => opt.UseMemberCasing());
 
             services.AddSpaStaticFiles(configuration =>
-                {
-                    configuration.RootPath = "ClientApp";
-                });
+            {
+                configuration.RootPath = "ClientApp";
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -44,7 +44,6 @@ namespace MongoBongo
             app.UseRouting();
             app.UseSpaStaticFiles();
             app.UseAuthorization();
-
 
             app.UseEndpoints(endpoints =>
             {
