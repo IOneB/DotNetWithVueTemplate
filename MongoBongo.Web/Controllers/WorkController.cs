@@ -1,43 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MongoBongo.Models;
-using MongoBongo.Services;
+using MongoBongo.DAL.Models.Entities;
+using MongoBongo.DAL.Services;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MongoBongo.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class AController : ControllerBase
-    {
-        [HttpGet]
-        public object Get()
-        {
-            return 90;
-        }
-    }
-
-
-    [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WorkController : ControllerBase
     {
         private readonly WorkService _workService;
 
         public WorkController(WorkService workService)
         {
-            this._workService = workService;
+            _workService = workService;
         }
 
         [HttpGet]
-        public ActionResult<List<Work>> Get()
+        public Task<List<Work>> Get()
         {
-            return _workService.Get();
+            return _workService.GetAsync();
         }
 
         [HttpGet("{id}", Name = "GetWork")]
-        public ActionResult<Work> Details(string id)
+        public async Task<ActionResult<Work>> Details(string id)
         {
-            var work = _workService.Get(id);
+            var work = await _workService.GetAsync(id);
 
             if (work is null)
                 return NotFound();
@@ -46,34 +35,33 @@ namespace MongoBongo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Create(Work work)
+        public async Task<IActionResult> Create(Work work)
         {
-            _workService.Create(work);
+            await _workService.CreateAsync(work);
 
             return CreatedAtAction("GetWork", new { id = work.Id }, work);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(string id, Work workIn)
+        public async Task<IActionResult> Update(string id, Work workIn)
         {
-            var work = _workService.Get(id);
-
+            var work = await _workService.GetAsync(id);
             if (work is null)
                 return NotFound();
 
-            _workService.Update(id, workIn);
+            await _workService.UpdateAsync(id, workIn);
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
-            var work = _workService.Get(id);
+            var work = await _workService.GetAsync(id);
             if (work is null)
                 return NotFound();
 
-            _workService.Remove(work.Id);
+            await _workService.RemoveAsync(work.Id);
             return NoContent();
         }
     }

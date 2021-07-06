@@ -1,10 +1,11 @@
-﻿using MongoDB.Bson;
+﻿using MongoBongo.DAL.Models.Enums;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
 
-namespace MongoBongo.Models
+namespace MongoBongo.DAL.Models.Entities
 {
-    public class Work
+    public class Work : IEntity
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -15,13 +16,5 @@ namespace MongoBongo.Models
         public string WorkName { get; set; }
 
         public Priority Priority { get; set; }
-    }
-
-    public enum Priority
-    {
-        None = 0,
-        Low = 1,
-        Medium = 3,
-        High = 5
     }
 }

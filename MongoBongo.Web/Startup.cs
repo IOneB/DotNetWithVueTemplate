@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using MongoBongo.Models.Config;
-using MongoBongo.Services;
+using MongoBongo.ConfigureServicesExtensions;
 
 namespace MongoBongo
 {
@@ -21,13 +19,10 @@ namespace MongoBongo
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .Configure<WorkDbSettings>(Configuration.GetSection(nameof(WorkDbSettings)))
-                .AddSingleton<IWorkDbSettings>(sp => sp.GetRequiredService<IOptions<WorkDbSettings>>().Value)
-                .AddSingleton<WorkService>();
+                .AddMongoDb(Configuration)
+                .AddSpaStaticFiles(config => config.RootPath = "wwwroot");
 
-            services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp");
-
-            services.AddControllers().AddNewtonsoftJson(opt => opt.UseMemberCasing());
+            services.AddControllers();
 
             services.AddCors(opt =>
             {
@@ -44,9 +39,7 @@ namespace MongoBongo
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.UseCors("VueCorsPolicy");
 
