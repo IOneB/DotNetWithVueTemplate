@@ -12,7 +12,7 @@ export default {
     };
   },
   async created() {
-    const resp = await fetch("/api/Work");
+    const resp = await fetch('/api/Work');
     this.data = await resp.json();
   },
 };
